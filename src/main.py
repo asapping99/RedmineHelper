@@ -71,6 +71,6 @@ class Main(Frame):
 
 if __name__ == '__main__':
     root = Tk()
-    root.iconbitmap(Config.CONFIG_CONSTANTS["project_dir"] + "/icon/icon.ico")
+    root.iconbitmap(Config.CONFIG_CONSTANTS["project_dir"] + Config.CONFIG_CONSTANTS["icon"])
     main_window = Main(master=root)
     root.mainloop()
