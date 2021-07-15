@@ -1,4 +1,6 @@
 import webbrowser
+import json
+import os
 from tkinter import *
 
 class Main(Frame):
@@ -11,6 +13,8 @@ class Main(Frame):
 
     @staticmethod
     def execute(self):
+        with open(os.path.abspath("../config/config.json"), "r") as f:
+            self.jsonData = json.load(f)
         self.make_window()
 
 
@@ -21,7 +25,7 @@ class Main(Frame):
         else:
             self.errorMsg.set("")
             self.issueNo.set("")
-            webbrowser.open_new_tab("https://snow.cyberdigm.co.kr/redmine/issues/"+issueNo)
+            webbrowser.open_new_tab(self.jsonData["server_url"]+"/issues/"+issueNo)
 
     def make_window(self):
         self.master.title("레드마인 도우미")
@@ -67,6 +71,6 @@ class Main(Frame):
 
 if __name__ == '__main__':
     root = Tk()
-    root.iconbitmap("D:\pyProject\RedmineHelper\icon\icon.ico")
+    root.iconbitmap(os.path.abspath("../icon/icon.ico"))
     main_window = Main(master=root)
     root.mainloop()
