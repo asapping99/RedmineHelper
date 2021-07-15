@@ -1,7 +1,7 @@
 import webbrowser
-import json
-import os
+#import json
 from tkinter import *
+import config.config as Config
 
 class Main(Frame):
     def __init__(self, master=None):
@@ -13,10 +13,9 @@ class Main(Frame):
 
     @staticmethod
     def execute(self):
-        with open(os.path.abspath("../config/config.json"), "r") as f:
-            self.jsonData = json.load(f)
+        #with open("config.json", "r") as f:
+        #    self.jsonData = json.load(f)
         self.make_window()
-
 
     def openClicked(self):
         issueNo = self.textboxIssueNo.get()
@@ -25,7 +24,8 @@ class Main(Frame):
         else:
             self.errorMsg.set("")
             self.issueNo.set("")
-            webbrowser.open_new_tab(self.jsonData["server_url"]+"/issues/"+issueNo)
+            webbrowser.open_new_tab(Config.CONFIG_CONSTANTS["server_url"]+"/issues/"+issueNo)
+            #webbrowser.open_new_tab(self.jsonData["server_url"] + "/issues/" + issueNo)
 
     def make_window(self):
         self.master.title("레드마인 도우미")
@@ -71,6 +71,6 @@ class Main(Frame):
 
 if __name__ == '__main__':
     root = Tk()
-    root.iconbitmap(os.path.abspath("../icon/icon.ico"))
+    root.iconbitmap(Config.CONFIG_CONSTANTS["project_dir"] + "/icon/icon.ico")
     main_window = Main(master=root)
     root.mainloop()
