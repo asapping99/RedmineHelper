@@ -4,8 +4,8 @@
 block_cipher = None
 
 
-a = Analysis(['D:\\pyProject\\RedmineHelper\\src\\main.py'],
-             pathex=['D:\\pyProject\\RedmineHelper'],
+a = Analysis(['src\\main.py'],
+             pathex=[],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -37,4 +37,4 @@ exe = EXE(pyz,
           disable_windowed_traceback=False,
           target_arch=None,
           codesign_identity=None,
-          entitlements_file=None , icon='icon\\icon.ico')
+          entitlements_file=None )
