@@ -12,6 +12,7 @@ class MyPage:
         self.root = root
         self.redmine_url = redmine_url
         self.json_data = json_data
+        self.root.master.geometry("450x200+100+100")
         self.root.mainFrame.config(relief=None, bd=0)
         # 홈 이동 버튼
         self.home_button()

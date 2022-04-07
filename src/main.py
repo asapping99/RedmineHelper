@@ -30,8 +30,7 @@ class Main(Frame):
 
     def make_window(self):
         self.master.title("레드마인 도우미")
-        self.master.geometry("800x420+100+100")
-        # self.master.geometry("400x140+100+100")
+        self.master.geometry("500x200+100+100")
         self.master.resizable(False, False)
 
         self.mainFrame = Frame(self.master)
@@ -49,6 +48,9 @@ class Main(Frame):
             if self.initPage == 1:
                 self.initPage = 0
                 self.move_mypage()
+            elif self.initPage == 2:
+                self.initPage = 0
+                self.move_favorite()
             else:
                 self.make_home()
 
@@ -78,14 +80,15 @@ class Main(Frame):
 
     # 내 페이지
     def move_mypage(self):
-        MyPage().execute(self, self.redmine_url, self.json_data)
         if self.homeFrame:
             self.homeFrame.destroy()
+        MyPage().execute(self, self.redmine_url, self.json_data)
 
     # 지켜보고 있는 일감 소요시간 등록
     def move_favorite(self):
+        if self.homeFrame:
+            self.homeFrame.destroy()
         Favorite().execute(self)
-        self.homeFrame.destroy()
 
     def saveUserInfo(self):
         userName = self.textboxUserName.get()

@@ -8,38 +8,73 @@ class Favorite:
     # 지켜보기 일감 소요시간 입력
     def execute(self, root):
         self.root = root
+        self.root.master.geometry("1120x420+100+100")
         self.root.mainFrame.config(relief="solid", bd=2)
+        self.searchStatus = "*"
+        self.searchStatusIndex = 0
         self.favorite_list_input_timeentries()
 
     def favorite_list_input_timeentries(self):
         if self.root.redmine:
-            issues = self.root.redmine.issue.filter(status_id='open', watcher_id='me')
+            print(self.searchStatus);
+            issues = self.root.redmine.issue.filter(status_id=self.searchStatus, watcher_id="me")
             self.submitDatas = {}
-            self.favoriteListCanvas = Canvas(self.root.mainFrame, width=750, height=340)
+            # 스크롤바를 위한 캔버스
+            self.favoriteListCanvas = Canvas(self.root.mainFrame, width=1070, height=340)
             self.favoriteListCanvas.grid(column=0, row=2, sticky="news")
-
+            # 스크롤바
             self.favoriteScroll = Scrollbar(self.root.mainFrame, orient="vertical", command=self.favoriteListCanvas.yview)
             self.favoriteScroll.grid(column=3, row=2, sticky='ns')
             self.favoriteListCanvas.configure(yscrollcommand=self.favoriteScroll.set)
-
+            # 리스트 프레임
             self.favoriteListFrame = Frame(self.favoriteListCanvas)
             self.favoriteListCanvas.create_window((0,0), window=self.favoriteListFrame, anchor="nw")
-
+            # 목록 헤더
             self.favorite_list_header()
+            # 목록 데이터
             for i in range(len(issues)):
                 issue = issues[i]
                 self.favorite_list_item(issue, i+1)
 
+            # 하단 버튼들
             self.favoriteButtons = Frame(self.root.master)
             self.favoriteButtons.pack(side=BOTTOM, pady=10)
+            ## 등록버튼
             submitTimeEntries = Button(self.favoriteButtons, text="등록", command=self.submit_time_entries, width=30)
-            submitTimeEntries.grid(column=0, row=0)
+            submitTimeEntries.grid(column=0, row=0, padx=30)
+            ## 조회버튼
+            self.search_status_combobox()
+
             reloadTimeEntries = Button(self.favoriteButtons, text="조회", command=self.reload_time_entries, width=30)
-            reloadTimeEntries.grid(column=1, row=0, padx=10)
+            reloadTimeEntries.grid(column=2, row=0)
+            ## 홈으로 이동
             homeBtn = Button(self.favoriteButtons, text="홈 으로...", command=self.move_home, width=30)
-            homeBtn.grid(column=2, row=0, padx=50)
+            homeBtn.grid(column=3, row=0, padx=50)
 
             self.favoriteListCanvas.config(scrollregion=self.favoriteListCanvas.bbox("all"))
+
+
+    def search_status_combobox(self):
+        optionNames = ("전체", "진행", "완료")
+        optionValues = ["*", "open", "closed"]
+        comboboxSV = StringVar()
+        combobox = ttk.Combobox(self.favoriteButtons, width=15, textvariable=comboboxSV, state="readonly")
+        combobox["values"] = optionNames
+
+        combobox.grid(column=1, row=0, padx=10)
+
+        def init_search_statue():
+            combobox.current(self.searchStatusIndex)
+
+        def favorite_list_search_status_change(event):
+            index = event.widget.current()
+            self.searchStatus = optionValues[index]
+            self.searchStatusIndex = index
+
+        combobox.bind("<<ComboboxSelected>>", favorite_list_search_status_change, optionValues)
+
+        self.root.after(0, init_search_statue)
+
 
     def move_home(self):
         self.favoriteScroll.destroy()
@@ -64,6 +99,7 @@ class Favorite:
         self.favorite_list_header_label("작업일시", 2, 120, 10)
         self.favorite_list_header_label("작업종류", 3, 120, 20)
         self.favorite_list_header_label("소요시간", 4, 120, 10)
+        self.favorite_list_header_label("설명", 5, 250, 42)
 
     def favorite_list_item_label(self, text, col, row, width, labelWidth, justify):
         label_frame = Frame(self.favoriteListFrame, width=width, padx=10, pady=5)
@@ -81,9 +117,11 @@ class Favorite:
 
     def favorite_list_item(self, issue, index):
         submitKey = str(issue.id) + "_" + str(index);
+        # 이슈번호
         self.favorite_list_item_label(issue.id, 0, index, 120, 10, CENTER)
+        # 제목
         self.favorite_list_item_label(issue.subject, 1, index, 320, 40, LEFT)
-
+        # 작업일시
         date = DateEntry(self.favoriteListFrame, values="Text", state="readonly", date_pattern="yyyy-mm-dd", width=10)
         date.grid(column=2, row=index)
 
@@ -92,6 +130,7 @@ class Favorite:
 
         date.bind("<<DateEntrySelected>>", favorite_list_item_date_change)
 
+        # 작업종류
         activities = issue.project.time_entry_activities
         optionNames = ["-- 선택 --"]
         optionValues = [-1]
@@ -100,11 +139,15 @@ class Favorite:
             optionNames.append(activity["name"])
             optionValues.append(activity["id"])
         n = StringVar()
-        combobox = ttk.Combobox(self.favoriteListFrame, width=15, textvariable=n)
+        combobox = ttk.Combobox(self.favoriteListFrame, width=15, textvariable=n, state="readonly")
         combobox["values"] = optionNames
 
         combobox.grid(column=3, row=index)
         combobox.current()
+        def init_combobox():
+            combobox.current(0)
+
+        self.root.after(0, init_combobox)
 
         def favorite_list_item_combobox_change(event):
             index = event.widget.current()
@@ -113,20 +156,33 @@ class Favorite:
 
         combobox.bind("<<ComboboxSelected>>", favorite_list_item_combobox_change, optionValues)
 
-        time = Entry(self.favoriteListFrame, width=10)
+        # 소요시간
+        timeSV = StringVar()
+        def favorite_list_item_time_input(*args):
+            self.submitDatas[submitKey]["hours"] = timeSV.get()
+
+        timeSV.trace("w", favorite_list_item_time_input)
+        time = Entry(self.favoriteListFrame, width=10, textvariable=timeSV)
         time.grid(column=4, row=index)
 
-        def favorite_list_item_time_input(event):
-            self.submitDatas[submitKey]["hours"] = time.get()
+        # 설명
+        commentsSV = StringVar()
+        def favorite_list_item_comments_input(*args):
+            self.submitDatas[submitKey]["comments"] = commentsSV.get()
 
-        time.bind("<KeyRelease>", favorite_list_item_time_input)
+        commentsSV.trace("w", favorite_list_item_comments_input)
+        comments = Entry(self.favoriteListFrame, width=40, textvariable=commentsSV)
+        comments.grid(column=5, row=index)
 
+        # 등록 데이터 초기화
         self.submitDatas[submitKey] = {
             "issue_id": issue.id,
             "spent_on": date.get(),
             "activity_id": activityId,
-            "hours": None
+            "hours": None,
+            "comments": None
         }
+
 
     def submit_time_entries(self):
         # valid = True
@@ -144,12 +200,16 @@ class Favorite:
             spendOn = self.submitDatas[key]["spent_on"]
             activityId = self.submitDatas[key]["activity_id"]
             hours = self.submitDatas[key]["hours"]
-            if activityId >= 0 and hours:
+            comments = self.submitDatas[key]["comments"]
+            print(hours)
+            if activityId >= 0 and hours and int(hours) >= 0:
+                print(comments)
                 self.root.redmine.time_entry.create(
                     issue_id=issueId,
                     spend_on=spendOn,
                     hours=hours,
-                    activity_id=activityId
+                    activity_id=activityId,
+                    comments=comments
                 )
         self.reload_time_entries()
 
