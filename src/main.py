@@ -4,6 +4,7 @@ import tkinter.messagebox as alert
 from redminelib import Redmine
 import json
 from modules.favorite import Favorite
+from modules.myissues import MyIssues
 from modules.mypage import MyPage
 from configuration.config import Config
 
@@ -51,6 +52,9 @@ class Main(Frame):
             elif self.initPage == 2:
                 self.initPage = 0
                 self.move_favorite()
+            elif self.initPage == 3:
+                self.initPage = 0
+                self.move_myissues()
             else:
                 self.make_home()
 
@@ -74,9 +78,11 @@ class Main(Frame):
         self.homeFrame = Frame(self.mainFrame.master)
         self.homeFrame.pack()
         mypageBtn = Button(self.homeFrame, text="내 페이지", command=self.move_mypage, width=30)
-        mypageBtn.grid(column=1, row=0, padx=10, pady=10)
+        mypageBtn.grid(column=0, row=0, padx=10, pady=10)
         favoriteBtn = Button(self.homeFrame, text="지켜보고 있는 일감\n소요시간 등록", command=self.move_favorite, width=30)
-        favoriteBtn.grid(column=2, row=0, padx=10, pady=10)
+        favoriteBtn.grid(column=1, row=0, padx=10, pady=10)
+        myissuesBtn = Button(self.homeFrame, text="내가 맡은 일감", command=self.move_myissues, width=30)
+        myissuesBtn.grid(column=0, row=1, padx=10, pady=10)
 
     # 내 페이지
     def move_mypage(self):
@@ -89,6 +95,12 @@ class Main(Frame):
         if self.homeFrame:
             self.homeFrame.destroy()
         Favorite().execute(self)
+
+    # 내가 맡은 일감
+    def move_myissues(self):
+        if self.homeFrame:
+            self.homeFrame.destroy()
+        MyIssues().execute(self)
 
     def saveUserInfo(self):
         userName = self.textboxUserName.get()

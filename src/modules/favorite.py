@@ -18,7 +18,6 @@ class Favorite:
 
     def favorite_list_input_timeentries(self):
         if self.root.redmine:
-            print(self.searchStatus);
             issues = self.root.redmine.issue.filter(status_id=self.searchStatus, watcher_id="me")
             self.submitDatas = {}
             # 스크롤바를 위한 캔버스
@@ -31,6 +30,11 @@ class Favorite:
             # 리스트 프레임
             self.favoriteListFrame = Frame(self.favoriteListCanvas)
             self.favoriteListCanvas.create_window((0,0), window=self.favoriteListFrame, anchor="nw")
+            # 마우스 휠
+            def scrollMouseWheel(event):
+                self.favoriteListCanvas.yview_scroll(int(-1 * (event.delta / 120)), "units")
+
+            self.favoriteListCanvas.bind_all("<MouseWheel>", scrollMouseWheel)
             # 목록 헤더
             self.favorite_list_header()
             # 목록 데이터
@@ -210,9 +214,7 @@ class Favorite:
             activityId = self.submitDatas[key]["activity_id"]
             hours = self.submitDatas[key]["hours"]
             comments = self.submitDatas[key]["comments"]
-            print(hours)
             if activityId >= 0 and hours and int(hours) >= 0:
-                print(comments)
                 self.root.redmine.time_entry.create(
                     issue_id=issueId,
                     spend_on=spendOn,

@@ -4,7 +4,7 @@
 block_cipher = None
 
 
-a = Analysis(['src\\main.py'],
+a = Analysis(['D:\\pyProject\\RedmineHelper\\src\\main.py'],
              pathex=[],
              binaries=[],
              datas=[],
