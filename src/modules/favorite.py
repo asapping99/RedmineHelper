@@ -1,6 +1,8 @@
 # favorite.py
+import webbrowser
 from datetime import datetime
 from tkinter import *
+from tkinter.font import *
 from tkinter import ttk
 from tkcalendar import DateEntry
 
@@ -101,7 +103,8 @@ class Favorite:
         self.favorite_list_header_label("소요시간", 4, 120, 10)
         self.favorite_list_header_label("설명", 5, 250, 42)
 
-    def favorite_list_item_label(self, text, col, row, width, labelWidth, justify):
+
+    def favorite_list_item_label(self, text, col, row, width, labelWidth, justify, cursor="arrow"):
         label_frame = Frame(self.favoriteListFrame, width=width, padx=10, pady=5)
         label_frame.grid(column=col, row=row)
         anchor = None
@@ -109,16 +112,22 @@ class Favorite:
             anchor = "sw"
 
         if labelWidth:
-            label = Label(label_frame, text=text, justify=justify, width=labelWidth, wraplength=labelWidth*7, anchor=anchor)
+            label = Label(label_frame, text=text, justify=justify, width=labelWidth, wraplength=labelWidth*7, anchor=anchor, cursor=cursor)
         else:
-            label = Label(label_frame, text=text, justify=justify, anchor=anchor)
+            label = Label(label_frame, text=text, justify=justify, anchor=anchor, cursor=cursor)
         label.pack()
+        return label
 
 
     def favorite_list_item(self, issue, index):
         submitKey = str(issue.id) + "_" + str(index);
         # 이슈번호
-        self.favorite_list_item_label(issue.id, 0, index, 120, 10, CENTER)
+        def move_issue_page(event):
+            webbrowser.open_new_tab(self.root.redmine_url + "/issues/" + str(issue.id))
+
+        issueLabel = self.favorite_list_item_label(issue.id, 0, index, 120, 10, CENTER)
+        issueLabel.config(highlightcolor="#dbdbdb", font=Font(underline=True, size=9), fg="#3F48CC")
+        issueLabel.bind("<Button-1>", move_issue_page)
         # 제목
         self.favorite_list_item_label(issue.subject, 1, index, 320, 40, LEFT)
         # 작업일시
