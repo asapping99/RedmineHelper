@@ -5,6 +5,7 @@ from tkinter import *
 from tkinter.font import *
 from tkinter import ttk
 from tkcalendar import DateEntry
+import pyperclip as pc
 
 class Favorite:
     # 지켜보기 일감 소요시간 입력
@@ -133,7 +134,12 @@ class Favorite:
         issueLabel.config(highlightcolor="#dbdbdb", font=Font(underline=True, size=9), fg="#3F48CC")
         issueLabel.bind("<Button-1>", move_issue_page)
         # 제목
-        self.favorite_list_item_label(issue.subject, 1, index, 320, 40, LEFT)
+        def clipboard_subject(event):
+            pc.copy(issue.subject)
+
+        subjectLabel = self.favorite_list_item_label(issue.subject, 1, index, 320, 40, LEFT)
+        subjectLabel.config(highlightcolor="#dbdbdb", font=Font(size=9), fg="#3F48CC")
+        subjectLabel.bind("<Button-1>", clipboard_subject)
         # 작업일시
         date = DateEntry(self.favoriteListFrame, values="Text", state="readonly", date_pattern="yyyy-mm-dd", width=10)
         date.grid(column=2, row=index)
@@ -214,7 +220,7 @@ class Favorite:
             activityId = self.submitDatas[key]["activity_id"]
             hours = self.submitDatas[key]["hours"]
             comments = self.submitDatas[key]["comments"]
-            if activityId >= 0 and hours and int(hours) >= 0:
+            if activityId >= 0 and hours and float(hours) >= 0:
                 self.root.redmine.time_entry.create(
                     issue_id=issueId,
                     spend_on=spendOn,
