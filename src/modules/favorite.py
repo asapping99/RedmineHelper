@@ -14,7 +14,7 @@ class Favorite:
         self.root.master.geometry("1120x420+100+100")
         self.root.mainFrame.config(relief="solid", bd=2)
         self.searchStatus = "*"
-        self.searchStatusIndex = 0
+        self.searchStatusIndex = 1
         self.favorite_list_input_timeentries()
 
     def favorite_list_input_timeentries(self):
